@@ -1,6 +1,7 @@
 package hello;
 
 import model.*;
+import org.springframework.beans.factory.annotation.*;
 import org.springframework.scheduling.annotation.*;
 import org.springframework.stereotype.*;
 import org.springframework.web.client.*;
@@ -17,7 +18,8 @@ import static java.util.stream.Collectors.toList;
 @Service
 public class QuoteLookupService {
 
-    RestTemplate restTemplate = new RestTemplate();
+    @Autowired
+    RestTemplate restTemplate;
 
     /**
      * get the quote using restTemplate and deserialize it to the object

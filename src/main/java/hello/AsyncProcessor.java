@@ -2,6 +2,7 @@ package hello;
 
 import com.sun.org.apache.xpath.internal.operations.*;
 import model.*;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
 import org.springframework.stereotype.*;
@@ -21,7 +22,11 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Service
 public class AsyncProcessor {
     private static final int TIMEOUT_POOL_SIZE = 5;
-    private static final int TIMEOUT_SEC = 1;
+    private static final int TIMEOUT_SEC = 2;
+    final static Logger LOGGER = LoggerFactory.getLogger(AsyncProcessor.class);
+
+    @Autowired
+    private ScheduledExecutorService scheduler;
 
     @Autowired
     QuoteLookupService quoteService;
@@ -94,12 +99,29 @@ public class AsyncProcessor {
      * @return
      */
     private List<CompletableFuture<Quote>> getCompletableFutureList(int i) {
+        CompletableFuture<Quote> oneSecondTimeout = failAfter(Duration.ofSeconds(TIMEOUT_SEC));
         long s = System.currentTimeMillis();
         List<CompletableFuture<Quote>> futureResults = IntStream.rangeClosed(1, i).mapToObj
                 (Integer -> quoteService
-                        .getCompletableQuote()).collect(Collectors.toList());
+                        .getCompletableQuote().applyToEitherAsync(oneSecondTimeout, Function.identity())
+                        .exceptionally(this::handleException)).
+                collect(Collectors.toList());
         System.out.println("Future generation Completed in:" + (System.currentTimeMillis() - s) + " ms.");
         return futureResults;
+    }
+
+    private CompletableFuture<Quote> failAfter(Duration duration) {
+        CompletableFuture<Quote> promise = new CompletableFuture<>();
+        scheduler.schedule(() -> {
+            final TimeoutException ex = new TimeoutException("Timeout after " + duration);
+            return promise.completeExceptionally(ex);
+        }, duration.toMillis(), MILLISECONDS);
+        return promise;
+    }
+
+    private Quote handleException(Throwable throwable) {
+        LOGGER.error(">>>Unrecoverable timeout error, {}", throwable);
+        return null;
     }
 
     private void processWrapper(CompletableFuture<Quote> future) {

@@ -29,6 +29,15 @@ dependencies {
     compile("org.springframework.boot:spring-boot-starter")
     compile("org.springframework:spring-web")
     compile("com.fasterxml.jackson.core:jackson-databind")
+    // http://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+    // http://mvnrepository.com/artifact/com.google.guava/guava
+    compile group: 'com.google.guava', name: 'guava', version: '19.0'
+    // http://mvnrepository.com/artifact/ch.qos.logback/logback-classic
+//    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
+    // http://mvnrepository.com/artifact/org.slf4j/slf4j-api
+//    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+
     testCompile("junit:junit")
 }
 task wrapper(type: Wrapper) {

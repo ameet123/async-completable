@@ -27,7 +27,7 @@ public class Application implements CommandLineRunner {
         long start = System.currentTimeMillis();
         List<Quote> quotes;
         // approach 1
-        quotes = asyncProcessor.multiSimpleQuotes(NUMBER_OF_QUOTES);
+//        quotes = asyncProcessor.multiSimpleQuotes(NUMBER_OF_QUOTES);
 
         // approach 2
 //        asyncProcessor.multiCompletableQuotes(NUMBER_OF_QUOTES);
