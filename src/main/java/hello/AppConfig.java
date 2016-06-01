@@ -14,19 +14,23 @@ import java.util.concurrent.*;
 @Configuration
 public class AppConfig {
 
-//    private static final int REQ_TIMEOUT_MS = 2000;
-
     @Autowired
     private ConfigVars configVars;
 
     /**
      * This {@link RestTemplate} allows us to inject a read and connect timeout for the
      * HTTP calls.
+     *
      * @return
      */
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate(clientHttpRequestFactory());
+    }
+
+    @Bean
+    public AsyncRestTemplate asyncRestTemplate() {
+        return new AsyncRestTemplate(asyncClientHttpRequestFactory());
     }
 
     /**
@@ -45,8 +49,23 @@ public class AppConfig {
                         .build());
     }
 
+    @Bean
+    public ListeningExecutorService listeningExecutorService() {
+        return MoreExecutors.listeningDecorator(Executors.newFixedThreadPool(10, new ThreadFactoryBuilder()
+                .setDaemon(true)
+                .setNameFormat("guava-%d")
+                .build()));
+    }
+
     private ClientHttpRequestFactory clientHttpRequestFactory() {
         HttpComponentsClientHttpRequestFactory factory = new HttpComponentsClientHttpRequestFactory();
+        factory.setReadTimeout(configVars.getTIMEOUT_MS());
+        factory.setConnectTimeout(configVars.getTIMEOUT_MS());
+        return factory;
+    }
+
+    private AsyncClientHttpRequestFactory asyncClientHttpRequestFactory() {
+        HttpComponentsAsyncClientHttpRequestFactory factory = new HttpComponentsAsyncClientHttpRequestFactory();
         factory.setReadTimeout(configVars.getTIMEOUT_MS());
         factory.setConnectTimeout(configVars.getTIMEOUT_MS());
         return factory;

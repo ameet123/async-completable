@@ -1,11 +1,15 @@
 package hello;
 
+import com.google.common.util.concurrent.*;
 import com.sun.org.apache.xpath.internal.operations.*;
 import model.*;
 import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
 import org.springframework.stereotype.*;
+import org.springframework.stereotype.Service;
+import org.springframework.web.client.*;
+
 
 import java.time.*;
 import java.util.*;
@@ -24,9 +28,9 @@ import static java.util.concurrent.TimeUnit.SECONDS;
 @Service
 public class AsyncProcessor {
     private static final int TIMEOUT_POOL_SIZE = 5;
-    //    private static final int TIMEOUT_SEC = 2;
     final static Logger LOGGER = LoggerFactory.getLogger(AsyncProcessor.class);
-
+    @Autowired
+    private ListeningExecutorService listeningExecutorService;
     @Autowired
     private ConfigVars configVars;
     @Autowired
@@ -34,6 +38,8 @@ public class AsyncProcessor {
 
     @Autowired
     QuoteLookupService quoteService;
+    @Autowired
+    RestTemplate restTemplate;
 
     /**
      * Uses a concurrency method based on {@link Future} to perform
@@ -80,7 +86,6 @@ public class AsyncProcessor {
     }
 
     public List<Quote> multiQuotesWithTimeout(int i) throws ExecutionException, InterruptedException, TimeoutException {
-
         long s = System.currentTimeMillis();
         List<CompletableFuture<Quote>> futureResults = getCompletableFutureList(i);
 
@@ -94,6 +99,46 @@ public class AsyncProcessor {
         }
         System.out.println("Completed with timeout in:" + (System.currentTimeMillis() - s) + " ms.");
         return quotes;
+    }
+
+    /**
+     * Using guava {@link ListenableFuture} to perform asynchronous calls
+     * No spring {@link org.springframework.scheduling.annotation.Async} is used in this case
+     *
+     * @param i
+     * @return
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    public List<Quote> multiQuoteGuava(int i) throws ExecutionException, InterruptedException {
+        long s = System.currentTimeMillis();
+        List<ListenableFuture<Quote>> futureList = new ArrayList<>();
+        for (int k = 0; k < i; k++) {
+            ListenableFuture<Quote> future = listeningExecutorService.submit(new Callable<Quote>() {
+                @Override
+                public Quote call() throws Exception {
+                    Thread.sleep(configVars.getINTENTIONAL_DELAY_MS());
+                    return restTemplate.getForObject(configVars.getAPP_URL(), QuoteResource.class).getValue();
+                }
+            });
+
+            Futures.addCallback(future, new FutureCallback<Quote>() {
+                @Override
+                public void onSuccess(Quote result) {
+                    LOGGER.info("! success");
+                    result.setThreadName(Thread.currentThread().getName());
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    LOGGER.error("Unable to fetch results:{}", t);
+                }
+            });
+            futureList.add(future);
+        }
+        List<Quote> returnedQuotes = Futures.successfulAsList(futureList).get();
+        System.out.println("Completed Guava-based listenable method in:" + (System.currentTimeMillis() - s) + " ms.");
+        return returnedQuotes;
     }
 
     /**

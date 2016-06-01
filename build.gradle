@@ -37,6 +37,10 @@ dependencies {
 //    compile group: 'ch.qos.logback', name: 'logback-classic', version: '1.1.7'
     // http://mvnrepository.com/artifact/org.slf4j/slf4j-api
 //    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.21'
+// http://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient
+    compile group: 'org.apache.httpcomponents', name: 'httpclient', version: '4.5.2'
+// http://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient
+    compile group: 'org.apache.httpcomponents', name: 'httpasyncclient', version: '4.1.1'
 
     testCompile("junit:junit")
 }

@@ -1,27 +1,30 @@
 package hello;
 
+import com.google.common.util.concurrent.*;
+import com.google.common.util.concurrent.ListenableFuture;
 import model.*;
+import org.slf4j.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.scheduling.annotation.*;
-import org.springframework.stereotype.*;
+import org.springframework.stereotype.Service;
+
 import org.springframework.web.client.*;
 
 import java.util.*;
 import java.util.concurrent.*;
-import java.util.stream.*;
-
-import static java.util.stream.Collectors.toList;
 
 /**
  * Created by ameet.chaubal on 5/31/2016.
  */
 @Service
 public class QuoteLookupService {
-
+    final static Logger LOGGER = LoggerFactory.getLogger(AsyncProcessor.class);
     @Autowired
     private ConfigVars configVars;
     @Autowired
     RestTemplate restTemplate;
+    @Autowired
+    AsyncRestTemplate asyncRestTemplate;
 
     /**
      * get the quote using restTemplate and deserialize it to the object

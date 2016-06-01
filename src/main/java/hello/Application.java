@@ -26,6 +26,7 @@ public class Application implements CommandLineRunner {
     public void run(String... args) throws Exception {
         // Start the clock
         long start = System.currentTimeMillis();
+
         List<Quote> quotes;
         // approach 1
 //        quotes = asyncProcessor.multiSimpleQuotes(NUMBER_OF_QUOTES);
@@ -37,8 +38,12 @@ public class Application implements CommandLineRunner {
 //        quotes = asyncProcessor.multiCompletableQuotesWithReturnList(NUMBER_OF_QUOTES);
 
         // approach 4
-        quotes = asyncProcessor.multiQuotesWithTimeout(configVars.getQUOTE_COUNT());
+//        quotes = asyncProcessor.multiQuotesWithTimeout(configVars.getQUOTE_COUNT());
 
+        // approach 5
+//        quotes = asyncProcessor.multiQuotesGuava(configVars.getQUOTE_COUNT());
+        quotes = asyncProcessor.multiQuoteGuava(configVars.getQUOTE_COUNT());
+        System.out.println("Returned from multi guava... Items:"+quotes.size());
         // final print
         quotes.stream().forEach(System.out::println);
     }
