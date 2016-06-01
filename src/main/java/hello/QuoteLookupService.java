@@ -19,6 +19,8 @@ import static java.util.stream.Collectors.toList;
 public class QuoteLookupService {
 
     @Autowired
+    private ConfigVars configVars;
+    @Autowired
     RestTemplate restTemplate;
 
     /**
@@ -39,7 +41,7 @@ public class QuoteLookupService {
     @Async
     public Future<Quote> simpleFutureQuote() {
         QuoteResource quoteResource = fetchQuote();
-        return new AsyncResult<Quote>(quoteResource.getValue());
+        return new AsyncResult<>(quoteResource.getValue());
     }
 
     private String getThreadName() {
@@ -48,11 +50,11 @@ public class QuoteLookupService {
 
     private QuoteResource fetchQuote() {
         QuoteResource quoteResource =
-                restTemplate.getForObject("http://gturnquist-quoters.cfapps.io/api/random", QuoteResource.class);
+                restTemplate.getForObject(configVars.getAPP_URL(), QuoteResource.class);
         quoteResource.getValue().setThreadName(getThreadName());
         // intentional delay
         try {
-            Thread.sleep(1000L);
+            Thread.sleep(configVars.getINTENTIONAL_DELAY_MS());
         } catch (InterruptedException e) {
             e.printStackTrace();
         }

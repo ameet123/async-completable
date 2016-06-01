@@ -14,12 +14,13 @@ import java.util.*;
 @SpringBootApplication
 @EnableAsync
 public class Application implements CommandLineRunner {
-    private static final int NUMBER_OF_QUOTES = 5;
 
     @Autowired
     private QuoteLookupService quoteService;
     @Autowired
     private AsyncProcessor asyncProcessor;
+    @Autowired
+    private ConfigVars configVars;
 
     @Override
     public void run(String... args) throws Exception {
@@ -36,12 +37,11 @@ public class Application implements CommandLineRunner {
 //        quotes = asyncProcessor.multiCompletableQuotesWithReturnList(NUMBER_OF_QUOTES);
 
         // approach 4
-        quotes = asyncProcessor.multiQuotesWithTimeout(NUMBER_OF_QUOTES);
+        quotes = asyncProcessor.multiQuotesWithTimeout(configVars.getQUOTE_COUNT());
 
         // final print
-        quotes.stream().forEach(q -> System.out.println(q));
+        quotes.stream().forEach(System.out::println);
     }
-
 
     public static void main(String[] args) {
         SpringApplication.run(Application.class, args);

@@ -1,0 +1,6 @@
+app:
+  rest_url: http://gturnquist-quoters.cfapps.io/api/random
+  quote_count: 5
+  timeout_ms: 2000
+  timeout_sec: 2
+  intentional_delay_ms: 1000
