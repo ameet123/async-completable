@@ -110,7 +110,7 @@ public class AsyncProcessor {
      * @throws ExecutionException
      * @throws InterruptedException
      */
-    public List<Quote> multiQuoteGuava(int i) throws ExecutionException, InterruptedException {
+    public List<Quote> multiQuoteGuava(int i) throws ExecutionException, InterruptedException, TimeoutException {
         long s = System.currentTimeMillis();
         List<ListenableFuture<Quote>> futureList = new ArrayList<>();
         for (int k = 0; k < i; k++) {
@@ -136,7 +136,8 @@ public class AsyncProcessor {
             });
             futureList.add(future);
         }
-        List<Quote> returnedQuotes = Futures.successfulAsList(futureList).get();
+        List<Quote> returnedQuotes = Futures.successfulAsList(futureList).get(configVars.getTIMEOUT_SEC() * i,
+                TimeUnit.SECONDS);
         System.out.println("Completed Guava-based listenable method in:" + (System.currentTimeMillis() - s) + " ms.");
         return returnedQuotes;
     }
