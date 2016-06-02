@@ -22,33 +22,27 @@ public class Application implements CommandLineRunner {
     @Autowired
     private ConfigVars configVars;
 
+    public static void main(String[] args) {
+        SpringApplication.run(Application.class, args);
+    }
+
     @Override
     public void run(String... args) throws Exception {
         // Start the clock
         long start = System.currentTimeMillis();
-
         List<Quote> quotes;
-        // approach 1
+
+        // approach 1 ==> Just for DEMO , simple Future - not the best
 //        quotes = asyncProcessor.multiSimpleQuotes(NUMBER_OF_QUOTES);
 
-        // approach 2
-//        asyncProcessor.multiCompletableQuotes(NUMBER_OF_QUOTES);
-
-        // approach 3
-//        quotes = asyncProcessor.multiCompletableQuotesWithReturnList(NUMBER_OF_QUOTES);
-
-        // approach 4
+        // approach 2 ==> CompletableFuture, elegant but a tad bit involved to 'read'
 //        quotes = asyncProcessor.multiQuotesWithTimeout(configVars.getQUOTE_COUNT());
 
-        // approach 5
-//        quotes = asyncProcessor.multiQuotesGuava(configVars.getQUOTE_COUNT());
+        // approach 3 ==> Guava ListenableFuture, easy to read and extend
         quotes = asyncProcessor.multiQuoteGuava(configVars.getQUOTE_COUNT());
-        System.out.println("Returned from multi guava... Items:"+quotes.size());
+        System.out.println("Returned from multi guava... Items:" + quotes.size());
+
         // final print
         quotes.stream().forEach(System.out::println);
-    }
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
     }
 }
